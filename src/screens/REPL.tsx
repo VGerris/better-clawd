@@ -68,6 +68,7 @@ import { useSkillImprovementSurvey } from '../hooks/useSkillImprovementSurvey.js
 import { useMoreRight } from '../moreright/useMoreRight.js';
 import { SpinnerWithVerb, BriefIdleStatus, type SpinnerMode } from '../components/Spinner.js';
 import { getSystemPrompt } from '../constants/prompts.js';
+import { PRODUCT_CONFIG_DIRNAME, PRODUCT_NAME } from '../constants/product.js';
 import { buildEffectiveSystemPrompt } from '../utils/systemPrompt.js';
 import { getSystemContext, getUserContext } from '../context.js';
 import { getMemoryFiles } from '../utils/claudemd.js';
@@ -1176,7 +1177,7 @@ export function REPL({
   // session from mid-conversation context.
   const haikuTitleAttemptedRef = useRef((initialMessages?.length ?? 0) > 0);
   const agentTitle = mainThreadAgentDefinition?.agentType;
-  const terminalTitle = sessionTitle ?? agentTitle ?? haikuTitle ?? 'Claude Code';
+  const terminalTitle = sessionTitle ?? agentTitle ?? haikuTitle ?? PRODUCT_NAME;
   const isWaitingForApproval = toolUseConfirmQueue.length > 0 || promptQueue.length > 0 || pendingWorkerRequest || pendingSandboxRequest;
   // Local-jsx commands (like /plugin, /config) show user-facing dialogs that
   // wait for input. Require jsx != null — if the flag is stuck true but jsx
@@ -1692,7 +1693,7 @@ export function REPL({
     if (wt.creationDurationMs < 15_000) return;
     worktreeTipShownRef.current = true;
     const secs = Math.round(wt.creationDurationMs / 1000);
-    setMessages(prev => [...prev, createSystemMessage(`Worktree creation took ${secs}s. For large repos, set \`worktree.sparsePaths\` in .claude/settings.json to check out only the directories you need — e.g. \`{"worktree": {"sparsePaths": ["src", "packages/foo"]}}\`.`, 'info')]);
+    setMessages(prev => [...prev, createSystemMessage(`Worktree creation took ${secs}s. For large repos, set \`worktree.sparsePaths\` in \`${PRODUCT_CONFIG_DIRNAME}/settings.json\` to check out only the directories you need — e.g. \`{"worktree": {"sparsePaths": ["src", "packages/foo"]}}\`.`, 'info')]);
   }, [setMessages]);
 
   // Hide spinner when the only in-progress tool is Sleep
@@ -4193,7 +4194,7 @@ export function REPL({
   useEffect(() => {
     const handleSuspend = () => {
       // Print suspension instructions
-      process.stdout.write(`\nClaude Code has been suspended. Run \`fg\` to bring Claude Code back.\nNote: ctrl + z now suspends Claude Code, ctrl + _ undoes input.\n`);
+      process.stdout.write(`\n${PRODUCT_NAME} has been suspended. Run \`fg\` to bring ${PRODUCT_NAME} back.\nNote: ctrl + z now suspends ${PRODUCT_NAME}, ctrl + _ undoes input.\n`);
     };
     const handleResume = () => {
       // Force complete component tree replacement instead of terminal clear

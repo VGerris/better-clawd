@@ -3,12 +3,11 @@ import { homedir } from 'os'
 import { join } from 'path'
 import {
   getConfiguredProductConfigDir,
-  LEGACY_PRODUCT_SLUG,
   PRODUCT_SLUG,
 } from '../constants/product.js'
 import { fileSuffixForOauthConfig } from '../constants/oauth.js'
 import { isRunningWithBun } from './bundledMode.js'
-import { getClaudeConfigHomeDir, isEnvTruthy } from './envUtils.js'
+import { isEnvTruthy } from './envUtils.js'
 import { findExecutable } from './findExecutable.js'
 import { getFsImplementation } from './fsOperations.js'
 import { which } from './which.js'
@@ -17,26 +16,14 @@ type Platform = 'win32' | 'darwin' | 'linux'
 
 // Config and data paths
 export const getGlobalClaudeFile = memoize((): string => {
-  const configHomeDir = getClaudeConfigHomeDir()
   const configDirOverride = getConfiguredProductConfigDir()
-
-  // Legacy fallback for backwards compatibility
-  const legacyConfigPath = join(configHomeDir, '.config.json')
-  if (getFsImplementation().existsSync(legacyConfigPath)) {
-    return legacyConfigPath
-  }
 
   const suffix = fileSuffixForOauthConfig()
   const preferredFilename = `.${PRODUCT_SLUG}${suffix}.json`
-  const legacyFilename = `.${LEGACY_PRODUCT_SLUG}${suffix}.json`
   const preferredPath = join(configDirOverride || homedir(), preferredFilename)
-  const legacyPath = join(configDirOverride || homedir(), legacyFilename)
 
   if (getFsImplementation().existsSync(preferredPath)) {
     return preferredPath
-  }
-  if (getFsImplementation().existsSync(legacyPath)) {
-    return legacyPath
   }
 
   return preferredPath

@@ -27,7 +27,11 @@ import pickBy from 'lodash-es/pickBy.js';
 import uniqBy from 'lodash-es/uniqBy.js';
 import React from 'react';
 import { getOauthConfig } from './constants/oauth.js';
-import { getRemoteSessionUrl } from './constants/product.js';
+import {
+  CLI_BINARY_NAME,
+  getRemoteSessionUrl,
+  PRODUCT_NAME,
+} from './constants/product.js';
 import { getSystemContext, getUserContext } from './context.js';
 import { init, initializeTelemetryAfterTrust } from './entrypoints/init.js';
 import { addToHistory } from './history.js';
@@ -952,7 +956,7 @@ async function run(): Promise<CommanderCommand> {
     // terminal shell integration may mirror the process name to the tab.
     // After init() so settings.json env can also gate this (gh-4765).
     if (!isEnvTruthy(process.env.CLAUDE_CODE_DISABLE_TERMINAL_TITLE)) {
-      process.title = 'claude';
+      process.title = CLI_BINARY_NAME;
     }
 
     // Attach logging sinks so subcommand handlers can use logEvent/logError.
@@ -997,7 +1001,7 @@ async function run(): Promise<CommanderCommand> {
     }
     profileCheckpoint('preAction_after_settings_sync');
   });
-  program.name('claude').description(`Claude Code - starts an interactive session by default, use -p/--print for non-interactive output`).argument('[prompt]', 'Your prompt', String)
+  program.name(CLI_BINARY_NAME).description(`${PRODUCT_NAME} starts an interactive session by default. Use -p/--print for non-interactive output.`).argument('[prompt]', 'Your prompt', String)
   // Subcommands inherit helpOption via commander's copyInheritedSettings —
   // setting it once here covers mcp, plugin, auth, and all other subcommands.
   .helpOption('-h, --help', 'Display help for command').option('-d, --debug [filter]', 'Enable debug mode with optional category filtering (e.g., "api,hooks" or "!1p,!file")', (_value: string | true) => {
@@ -1051,7 +1055,7 @@ async function run(): Promise<CommanderCommand> {
     if (prompt === 'code') {
       logEvent('tengu_code_prompt_ignored', {});
       // biome-ignore lint/suspicious/noConsole:: intentional console output
-      console.warn(chalk.yellow('Tip: You can launch Claude Code with just `claude`'));
+      console.warn(chalk.yellow(`Tip: You can launch ${PRODUCT_NAME} with just \`${CLI_BINARY_NAME}\``));
       prompt = undefined;
     }
 
@@ -3835,7 +3839,7 @@ async function run(): Promise<CommanderCommand> {
         pendingHookMessages
       }, renderAndRun);
     }
-  }).version(`${MACRO.VERSION} (Claude Code)`, '-v, --version', 'Output the version number');
+  }).version(`${MACRO.VERSION} (${PRODUCT_NAME})`, '-v, --version', 'Output the version number');
 
   // Worktree flags
   program.option('-w, --worktree [name]', 'Create a new git worktree for this session (optionally specify a name)');

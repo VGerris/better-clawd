@@ -4,12 +4,11 @@ import { homedir } from 'os'
 import { join } from 'path'
 import {
   getConfiguredProductConfigDir,
-  LEGACY_PRODUCT_CONFIG_DIRNAME,
   PRODUCT_CONFIG_DIRNAME,
 } from '../constants/product.js'
 
-// Memoized: 150+ callers, many on hot paths. Keyed off CLAUDE_CONFIG_DIR so
-// tests that change the env var get a fresh value without explicit cache.clear.
+// Memoized: 150+ callers, many on hot paths. Keyed off BETTER_CLAWD_CONFIG_DIR
+// so tests that change the env var get a fresh value without explicit cache.clear.
 export const getClaudeConfigHomeDir = memoize(
   (): string => {
     const configuredDir = getConfiguredProductConfigDir()
@@ -18,13 +17,9 @@ export const getClaudeConfigHomeDir = memoize(
     }
 
     const betterClawdDir = join(homedir(), PRODUCT_CONFIG_DIRNAME)
-    const legacyClaudeDir = join(homedir(), LEGACY_PRODUCT_CONFIG_DIRNAME)
 
     if (existsSync(betterClawdDir)) {
       return betterClawdDir.normalize('NFC')
-    }
-    if (existsSync(legacyClaudeDir)) {
-      return legacyClaudeDir.normalize('NFC')
     }
 
     return betterClawdDir.normalize('NFC')

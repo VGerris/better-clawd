@@ -25,10 +25,7 @@ export const CLAUDE_AI_STAGING_BASE_URL = ANTHROPIC_APP_STAGING_BASE_URL
 export const CLAUDE_AI_LOCAL_BASE_URL = ANTHROPIC_APP_LOCAL_BASE_URL
 
 export function getConfiguredProductConfigDir(): string | undefined {
-  return (
-    process.env[PRODUCT_CONFIG_ENV_VAR] ??
-    process.env[LEGACY_PRODUCT_CONFIG_ENV_VAR]
-  )
+  return process.env[PRODUCT_CONFIG_ENV_VAR]
 }
 
 /**

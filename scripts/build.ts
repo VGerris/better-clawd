@@ -13,7 +13,7 @@ const result = await Bun.build({
   minify: false,
   naming: 'cli.mjs',
   define: {
-    'MACRO.VERSION': JSON.stringify('99.0.0'),
+    'MACRO.VERSION': JSON.stringify(version),
     'MACRO.DISPLAY_VERSION': JSON.stringify(version),
     'MACRO.BUILD_TIME': JSON.stringify(new Date().toISOString()),
     'MACRO.ISSUES_EXPLAINER': JSON.stringify(

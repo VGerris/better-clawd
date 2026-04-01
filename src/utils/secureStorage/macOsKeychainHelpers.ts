@@ -19,7 +19,6 @@ import { userInfo } from 'os'
 import { getOauthConfig } from 'src/constants/oauth.js'
 import {
   getConfiguredProductConfigDir,
-  LEGACY_PRODUCT_NAME,
   PRODUCT_NAME,
 } from 'src/constants/product.js'
 import { getClaudeConfigHomeDir } from '../envUtils.js'
@@ -33,7 +32,6 @@ export const CREDENTIALS_SERVICE_SUFFIX = '-credentials'
 
 export function getMacOsKeychainStorageServiceName(
   serviceSuffix: string = '',
-  opts: { legacy?: boolean } = {},
 ): string {
   const configDir = getClaudeConfigHomeDir()
   const isDefaultDir = !getConfiguredProductConfigDir()
@@ -43,18 +41,13 @@ export function getMacOsKeychainStorageServiceName(
   const dirHash = isDefaultDir
     ? ''
     : `-${createHash('sha256').update(configDir).digest('hex').substring(0, 8)}`
-  const baseName = opts.legacy ? LEGACY_PRODUCT_NAME : PRODUCT_NAME
-  return `${baseName}${getOauthConfig().OAUTH_FILE_SUFFIX}${serviceSuffix}${dirHash}`
+  return `${PRODUCT_NAME}${getOauthConfig().OAUTH_FILE_SUFFIX}${serviceSuffix}${dirHash}`
 }
 
 export function getMacOsKeychainStorageServiceNames(
   serviceSuffix: string = '',
 ): string[] {
-  const names = [
-    getMacOsKeychainStorageServiceName(serviceSuffix),
-    getMacOsKeychainStorageServiceName(serviceSuffix, { legacy: true }),
-  ]
-  return Array.from(new Set(names))
+  return [getMacOsKeychainStorageServiceName(serviceSuffix)]
 }
 
 export function getUsername(): string {

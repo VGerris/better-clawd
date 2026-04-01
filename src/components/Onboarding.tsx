@@ -2,6 +2,7 @@ import { c as _c } from "react/compiler-runtime";
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS, logEvent } from 'src/services/analytics/index.js';
 import { setupTerminal, shouldOfferTerminalSetup } from '../commands/terminalSetup/terminalSetup.js';
+import { Login } from '../commands/login/login.js';
 import { useExitOnCtrlCDWithKeybindings } from '../hooks/useExitOnCtrlCDWithKeybindings.js';
 import { Box, Link, Newline, Text, useTheme } from '../ink.js';
 import { useKeybindings } from '../keybindings/useKeybinding.js';
@@ -13,7 +14,6 @@ import { isRunningOnHomespace } from '../utils/envUtils.js';
 import { PreflightStep } from '../utils/preflightChecks.js';
 import type { ThemeSetting } from '../utils/theme.js';
 import { ApproveApiKey } from './ApproveApiKey.js';
-import { ConsoleOAuthFlow } from './ConsoleOAuthFlow.js';
 import { Select } from './CustomSelect/select.js';
 import { WelcomeV2 } from './LogoV2/WelcomeV2.js';
 import { PressEnterToContinue } from './PressEnterToContinue.js';
@@ -134,7 +134,13 @@ export function Onboarding({
     steps.push({
       id: 'oauth',
       component: <SkippableStep skip={skipOAuth} onSkip={goToNextStep}>
-          <ConsoleOAuthFlow onDone={goToNextStep} />
+          <Login
+            startingMessage="Choose which provider you want Better-Clawd to use for setup."
+            onDone={success => {
+            if (success) {
+              goToNextStep();
+            }
+          }} />
         </SkippableStep>
     });
   }
