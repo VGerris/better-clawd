@@ -11,6 +11,7 @@ import { OAUTH_BETA_HEADER } from '../constants/oauth.js'
 import {
   getAnthropicApiKey,
   getClaudeAIOAuthTokens,
+  getFirepassApiKey,
   getOpenAIApiKey,
   getOpenRouterApiKey,
   handleOAuth401Error,
@@ -96,6 +97,22 @@ export function getAuthHeaders(): AuthHeaders {
     return {
       headers: {
         Authorization: `Bearer ${apiKey}`,
+      },
+    }
+  }
+
+  if (provider === 'firepass') {
+    const apiKey = getFirepassApiKey()
+    if (!apiKey) {
+      return {
+        headers: {},
+        error: 'No FirePass API key available',
+      }
+    }
+    // FirePass uses x-api-key header like Anthropic
+    return {
+      headers: {
+        'x-api-key': apiKey,
       },
     }
   }

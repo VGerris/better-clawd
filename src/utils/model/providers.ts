@@ -5,6 +5,7 @@ export type APIProvider =
   | 'firstParty'
   | 'openrouter'
   | 'openai'
+  | 'firepass'
   | 'bedrock'
   | 'vertex'
   | 'foundry'
@@ -20,10 +21,11 @@ function getStoredProviderPreference(): APIProvider | null {
       require('../env.js') as typeof import('../env.js')
     const raw = readFileSync(getGlobalClaudeFile(), 'utf8')
     const config = JSON.parse(raw) as {
-      authProvider?: 'anthropic' | 'openrouter' | 'openai'
+      authProvider?: 'anthropic' | 'openrouter' | 'openai' | 'firepass'
       openRouterApiKey?: string
       openAiApiKey?: string
       openAiAccessToken?: string
+      firepassApiKey?: string
     }
 
     switch (config.authProvider) {
@@ -33,6 +35,8 @@ function getStoredProviderPreference(): APIProvider | null {
         return config.openAiApiKey || config.openAiAccessToken
           ? 'openai'
           : null
+      case 'firepass':
+        return config.firepassApiKey ? 'firepass' : null
       case 'anthropic':
         return 'firstParty'
       default:
@@ -57,6 +61,10 @@ function getExplicitProviderOverride(): APIProvider | null {
       return 'openrouter'
     case 'openai':
       return 'openai'
+    case 'firepass':
+    case 'fire-pass':
+    case 'fire_pass':
+      return 'firepass'
     case 'bedrock':
       return 'bedrock'
     case 'vertex':
@@ -98,6 +106,28 @@ export function isOpenAIConfigured(): boolean {
   )
 }
 
+export function isFirepassBaseUrl(baseUrl?: string | null): boolean {
+  if (!baseUrl) {
+    return false
+  }
+  try {
+    const host = new URL(baseUrl).host
+    return host === 'api.fireworks.ai'
+  } catch {
+    return false
+  }
+}
+
+export function isFirepassConfigured(): boolean {
+  return (
+    getExplicitProviderOverride() === 'firepass' ||
+    Boolean(process.env.FIREPASS_API_KEY) ||
+    Boolean(process.env.FIREWORKS_API_KEY) ||
+    isFirepassBaseUrl(process.env.FIREPASS_BASE_URL) ||
+    isFirepassBaseUrl(process.env.ANTHROPIC_BASE_URL)
+  )
+}
+
 export function getOpenRouterBaseUrl(): string {
   const configuredBaseUrl = process.env.OPENROUTER_BASE_URL
   const fallbackBaseUrl = 'https://openrouter.ai/api'
@@ -129,6 +159,35 @@ export function getOpenAIBaseUrl(): string {
   return process.env.OPENAI_BASE_URL ?? 'https://api.openai.com/v1'
 }
 
+/**
+ * Get the FirePass base URL for Anthropic-compatible API.
+ * FirePass uses Fireworks AI's inference endpoint with Anthropic compatibility.
+ * Default: https://api.fireworks.ai/inference (Anthropic SDK appends /v1/messages)
+ */
+export function getFirepassBaseUrl(): string {
+  const configuredBaseUrl = process.env.FIREPASS_BASE_URL
+  if (!configuredBaseUrl) {
+    return 'https://api.fireworks.ai/inference'
+  }
+
+  try {
+    const url = new URL(configuredBaseUrl)
+
+    // Normalize path for Anthropic SDK compatibility
+    // SDK appends /v1/messages, so base should be /inference not /inference/v1
+    if (url.host === 'api.fireworks.ai') {
+      const normalizedPath = url.pathname.replace(/\/+$/, '')
+      if (normalizedPath === '/inference/v1' || normalizedPath === '/v1') {
+        url.pathname = '/inference'
+      }
+    }
+
+    return url.toString().replace(/\/$/, '')
+  } catch {
+    return configuredBaseUrl
+  }
+}
+
 export function getAPIProvider(): APIProvider {
   const explicitProvider = getExplicitProviderOverride()
   if (explicitProvider) {
@@ -143,9 +202,11 @@ export function getAPIProvider(): APIProvider {
         ? 'foundry'
         : isOpenAIConfigured()
           ? 'openai'
-          : isOpenRouterConfigured()
-            ? 'openrouter'
-            : getStoredProviderPreference() ?? 'firstParty'
+          : isFirepassConfigured()
+            ? 'firepass'
+            : isOpenRouterConfigured()
+              ? 'openrouter'
+              : getStoredProviderPreference() ?? 'firstParty'
 }
 
 export function getAPIProviderForStatsig(): AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS {

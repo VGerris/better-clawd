@@ -6,6 +6,7 @@ import {
   getAnthropicApiKey,
   getApiKeyFromApiKeyHelper,
   getClaudeAIOAuthTokens,
+  getFirepassApiKey,
   getOpenAIApiKey,
   getOpenRouterApiKey,
   isClaudeAISubscriber,
@@ -17,6 +18,7 @@ import { getUserAgent } from 'src/utils/http.js'
 import { getSmallFastModel } from 'src/utils/model/model.js'
 import {
   getAPIProvider,
+  getFirepassBaseUrl,
   getOpenAIBaseUrl,
   getOpenRouterBaseUrl,
   isFirstPartyAnthropicBaseUrl,
@@ -309,6 +311,26 @@ export async function getAnthropicClient({
       apiKey: null,
       authToken: apiKey || getOpenRouterApiKey(),
       baseURL: getOpenRouterBaseUrl(),
+      ...ARGS,
+      ...(isDebugToStdErr() && { logger: createStderrLogger() }),
+    }
+
+    return new Anthropic(clientConfig)
+  }
+
+  if (provider === 'firepass') {
+    // FirePass uses Fireworks AI's Anthropic-compatible endpoint
+    // Requires an active FirePass subscription for the kimi-k2p5-turbo router
+    const firepassKey = apiKey || getFirepassApiKey()
+    if (!firepassKey) {
+      throw new Error(
+        'FirePass provider selected but no FirePass/Fireworks API key is configured. Set FIREPASS_API_KEY or FIREWORKS_API_KEY.',
+      )
+    }
+
+    const clientConfig: ConstructorParameters<typeof Anthropic>[0] = {
+      apiKey: firepassKey,
+      baseURL: getFirepassBaseUrl(),
       ...ARGS,
       ...(isDebugToStdErr() && { logger: createStderrLogger() }),
     }

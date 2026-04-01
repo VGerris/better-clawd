@@ -11,6 +11,7 @@ import { ConfigurableShortcutHint } from '../../components/ConfigurableShortcutH
 import { ConsoleOAuthFlow } from '../../components/ConsoleOAuthFlow.js'
 import { Select } from '../../components/CustomSelect/select.js'
 import { Dialog } from '../../components/design-system/Dialog.js'
+import { FirepassLoginFlow } from '../../components/FirepassLoginFlow.js'
 import { OpenAILoginFlow } from '../../components/OpenAILoginFlow.js'
 import { OpenRouterLoginFlow } from '../../components/OpenRouterLoginFlow.js'
 import { useMainLoopModel } from '../../hooks/useMainLoopModel.js'
@@ -29,7 +30,7 @@ import {
 } from '../../utils/permissions/bypassPermissionsKillswitch.js'
 import { resetUserCache } from '../../utils/user.js'
 
-type AuthProviderChoice = 'anthropic' | 'openai' | 'openrouter'
+type AuthProviderChoice = 'anthropic' | 'openai' | 'openrouter' | 'firepass'
 
 export async function call(
   onDone: LocalJSXCommandOnDone,
@@ -124,6 +125,18 @@ export function Login(props: {
         ),
         value: 'openrouter',
       },
+      {
+        label: (
+          <Text>
+            FirePass{' '}
+            <Text dimColor={true}>
+              Fireworks API key with Kimi K2.5 Turbo subscription
+            </Text>
+            {'\n'}
+          </Text>
+        ),
+        value: 'firepass',
+      },
     ],
     [],
   )
@@ -161,6 +174,11 @@ export function Login(props: {
       <OpenRouterLoginFlow
         onDone={onFlowDone}
         startingMessage="Better-Clawd can use OpenRouter with your OpenRouter API key."
+      />
+    ) : selectedProvider === 'firepass' ? (
+      <FirepassLoginFlow
+        onDone={onFlowDone}
+        startingMessage="Better-Clawd can use FirePass with your Fireworks API key for Kimi K2.5 Turbo."
       />
     ) : (
       <ConsoleOAuthFlow

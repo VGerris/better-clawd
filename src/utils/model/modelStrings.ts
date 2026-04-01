@@ -35,7 +35,20 @@ function getBuiltinModelStrings(provider: APIProvider): ModelStrings {
     const out = getBuiltinModelStrings('firstParty') as Record<string, string>
     out.sonnet46 =
       process.env.OPENROUTER_SONNET_MODEL || 'anthropic/claude-sonnet-4.6'
+    out.opus46 =
       process.env.OPENROUTER_OPUS_MODEL || 'anthropic/claude-opus-4.6'
+    return out as ModelStrings
+  }
+
+  if (provider === 'firepass') {
+    // FirePass uses Fireworks AI's Kimi K2.5 Turbo by default
+    // Users can override with FIREPASS_MODEL env var
+    const out = getBuiltinModelStrings('firstParty') as Record<string, string>
+    const firepassModel =
+      process.env.FIREPASS_MODEL || 'accounts/fireworks/routers/kimi-k2p5-turbo'
+    out.haiku45 = firepassModel
+    out.sonnet46 = firepassModel
+    out.opus46 = firepassModel
     return out as ModelStrings
   }
 
