@@ -20,7 +20,7 @@ Or run it without a global install:
 npx better-clawd
 ```
 
-## Why This Fork Exists
+## Why This Exists
 
 Claude Code had the bones of a best-in-class coding CLI, but too much of the experience was tied to one company, one backend, one set of assumptions, and one way of doing things.
 
