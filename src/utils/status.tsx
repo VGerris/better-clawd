@@ -13,6 +13,7 @@ import { getIdeClientName, type IDEExtensionInstallationStatus, isJetBrainsIde, 
 import { getClaudeAiUserDefaultModelDescription, modelDisplayString } from './model/model.js';
 import {
   getAPIProvider,
+  getFirepassBaseUrl,
   getOpenAIBaseUrl,
   getOpenRouterBaseUrl,
 } from './model/providers.js';
@@ -248,6 +249,7 @@ export function buildAPIProviderProperties(): Property[] {
     const providerLabel = {
       openrouter: 'OpenRouter',
       openai: 'OpenAI',
+      firepass: 'FirePass',
       bedrock: 'AWS Bedrock',
       vertex: 'Google Vertex AI',
       foundry: 'Microsoft Foundry'
@@ -274,6 +276,11 @@ export function buildAPIProviderProperties(): Property[] {
     properties.push({
       label: 'OpenAI base URL',
       value: getOpenAIBaseUrl()
+    });
+  } else if (apiProvider === 'firepass') {
+    properties.push({
+      label: 'FirePass base URL',
+      value: getFirepassBaseUrl()
     });
   } else if (apiProvider === 'bedrock') {
     const bedrockBaseUrl = process.env.BEDROCK_BASE_URL;

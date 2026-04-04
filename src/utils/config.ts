@@ -221,7 +221,7 @@ export type GlobalConfig = {
     approved?: string[]
     rejected?: string[]
   }
-  authProvider?: 'anthropic' | 'openrouter' | 'openai'
+  authProvider?: 'anthropic' | 'openrouter' | 'openai' | 'firepass'
   primaryApiKey?: string // Primary API key for the user when no environment variable is set, set via oauth (TODO: rename)
   openAiApiKey?: string
   openAiAccessToken?: string
@@ -229,6 +229,7 @@ export type GlobalConfig = {
   openAiTokenExpiresAt?: number
   openAiWorkspaceId?: string
   openRouterApiKey?: string
+  firepassApiKey?: string
   hasAcknowledgedCostThreshold?: boolean
   hasSeenUndercoverAutoNotice?: boolean // ant-only: whether the one-time auto-undercover explainer has been shown
   hasSeenUltraplanTerms?: boolean // ant-only: whether the one-time CCR terms notice has been shown in the ultraplan launch dialog

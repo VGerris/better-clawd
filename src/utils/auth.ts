@@ -239,6 +239,12 @@ export type OpenRouterApiKeySource =
   | '/login managed OpenRouter key'
   | 'none'
 
+export type FirepassApiKeySource =
+  | 'FIREPASS_API_KEY'
+  | 'FIREWORKS_API_KEY'
+  | '/login managed FirePass key'
+  | 'none'
+
 export function getAnthropicApiKey(): null | string {
   const { key } = getAnthropicApiKeyWithSource()
   return key
@@ -307,10 +313,33 @@ export function getOpenRouterApiKeyWithSource(): {
     : { key: null, source: 'none' }
 }
 
+export function getFirepassApiKey(): null | string {
+  return getFirepassApiKeyWithSource().key
+}
+
+export function getFirepassApiKeyWithSource(): {
+  key: null | string
+  source: FirepassApiKeySource
+} {
+  // Check FIREPASS_API_KEY first, then fall back to FIREWORKS_API_KEY
+  if (process.env.FIREPASS_API_KEY) {
+    return { key: process.env.FIREPASS_API_KEY, source: 'FIREPASS_API_KEY' }
+  }
+  if (process.env.FIREWORKS_API_KEY) {
+    return { key: process.env.FIREWORKS_API_KEY, source: 'FIREWORKS_API_KEY' }
+  }
+
+  const key = getGlobalConfig().firepassApiKey
+  return key
+    ? { key, source: '/login managed FirePass key' }
+    : { key: null, source: 'none' }
+}
+
 export function getConfiguredAuthProvider():
   | 'anthropic'
   | 'openrouter'
-  | 'openai' {
+  | 'openai'
+  | 'firepass' {
   const storedProvider = getGlobalConfig().authProvider
   if (storedProvider) {
     return storedProvider
@@ -322,6 +351,8 @@ export function getConfiguredAuthProvider():
       return 'openrouter'
     case 'openai':
       return 'openai'
+    case 'firepass':
+      return 'firepass'
     default:
       return 'anthropic'
   }
@@ -1403,6 +1434,19 @@ export async function saveOpenRouterApiKey(apiKey: string): Promise<void> {
     ...current,
     authProvider: 'openrouter',
     openRouterApiKey: apiKey,
+  }))
+}
+
+export async function saveFirepassApiKey(apiKey: string): Promise<void> {
+  if (!isValidApiKey(apiKey)) {
+    throw new Error(
+      'Invalid API key format. API key must contain only alphanumeric characters, dashes, and underscores.',
+    )
+  }
+  saveGlobalConfig(current => ({
+    ...current,
+    authProvider: 'firepass',
+    firepassApiKey: apiKey,
   }))
 }
 

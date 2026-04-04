@@ -109,6 +109,10 @@ export function getDefaultOpusModel(): ModelName {
   if (process.env.ANTHROPIC_DEFAULT_OPUS_MODEL) {
     return process.env.ANTHROPIC_DEFAULT_OPUS_MODEL
   }
+  // FirePass uses Kimi K2.5 Turbo for all model tiers
+  if (getAPIProvider() === 'firepass') {
+    return getModelStrings().opus46
+  }
   // 3P providers (Bedrock, Vertex, Foundry) — kept as a separate branch
   // even when values match, since 3P availability lags firstParty and
   // these will diverge again at the next model launch.
@@ -123,6 +127,10 @@ export function getDefaultSonnetModel(): ModelName {
   if (process.env.ANTHROPIC_DEFAULT_SONNET_MODEL) {
     return process.env.ANTHROPIC_DEFAULT_SONNET_MODEL
   }
+  // FirePass uses Kimi K2.5 Turbo for all model tiers
+  if (getAPIProvider() === 'firepass') {
+    return getModelStrings().sonnet46
+  }
   // Default to Sonnet 4.5 for 3P since they may not have 4.6 yet
   if (getAPIProvider() !== 'firstParty') {
     return getModelStrings().sonnet45
@@ -135,7 +143,10 @@ export function getDefaultHaikuModel(): ModelName {
   if (process.env.ANTHROPIC_DEFAULT_HAIKU_MODEL) {
     return process.env.ANTHROPIC_DEFAULT_HAIKU_MODEL
   }
-
+  // FirePass uses Kimi K2.5 Turbo for all model tiers
+  if (getAPIProvider() === 'firepass') {
+    return getModelStrings().haiku45
+  }
   // Haiku 4.5 is available on all platforms (first-party, Foundry, Bedrock, Vertex)
   return getModelStrings().haiku45
 }
@@ -185,6 +196,11 @@ export function getDefaultMainLoopModelSetting(): ModelName | ModelAlias {
       getAntModelOverrideConfig()?.defaultModel ??
       getDefaultOpusModel() + '[1m]'
     )
+  }
+
+  // FirePass uses Kimi K2.5 Turbo for all users
+  if (getAPIProvider() === 'firepass') {
+    return getModelStrings().sonnet46 // Returns Kimi K2.5 Turbo
   }
 
   // Max users get Opus as default
@@ -350,6 +366,10 @@ export function renderModelSetting(setting: ModelName | ModelAlias): string {
  * if the model is not recognized as a public model.
  */
 export function getPublicModelDisplayName(model: ModelName): string | null {
+  // FirePass Kimi K2.5 Turbo
+  if (model.includes('kimi-k2p5-turbo') || model.includes('kimi-k2.5-turbo')) {
+    return 'Kimi K2.5 Turbo'
+  }
   switch (model) {
     case getModelStrings().opus46:
       return 'Opus 4.6'
@@ -574,6 +594,11 @@ export function getMarketingNameForModel(modelId: string): string | undefined {
   if (getAPIProvider() === 'foundry') {
     // deployment ID is user-defined in Foundry, so it may have no relation to the actual model
     return undefined
+  }
+
+  // FirePass Kimi K2.5 Turbo
+  if (modelId.includes('kimi-k2p5-turbo') || modelId.includes('kimi-k2.5-turbo')) {
+    return 'Kimi K2.5 Turbo'
   }
 
   const has1m = modelId.toLowerCase().includes('[1m]')

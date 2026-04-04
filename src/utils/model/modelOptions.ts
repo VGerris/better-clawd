@@ -45,6 +45,7 @@ export type ModelOption = {
 export function getDefaultOptionForUser(fastMode = false): ModelOption {
   const provider = getAPIProvider()
   const isOpenAI = provider === 'openai'
+  const isFirepass = provider === 'firepass'
   if (process.env.USER_TYPE === 'ant') {
     const currentModel = renderDefaultModelSetting(
       getDefaultMainLoopModelSetting(),
@@ -68,6 +69,14 @@ export function getDefaultOptionForUser(fastMode = false): ModelOption {
 
   // PAYG
   const is3P = provider !== 'firstParty'
+  if (isFirepass) {
+    return {
+      value: null,
+      label: 'Default (recommended)',
+      description: 'Use Kimi K2.5 Turbo (FirePass subscription)',
+      descriptionForModel: 'Kimi K2.5 Turbo - FirePass subscription with 256K context',
+    }
+  }
   return {
     value: null,
     label: 'Default (recommended)',
@@ -107,6 +116,16 @@ function getSonnet46Option(): ModelOption {
       description: 'GPT-5.4 · Recommended for most coding tasks',
       descriptionForModel:
         'GPT-5.4 - recommended for most coding and agentic tasks on OpenAI',
+    }
+  }
+  if (provider === 'firepass') {
+    const firepassModel = getModelStrings().sonnet46
+    return {
+      value: firepassModel,
+      label: 'Kimi K2.5 Turbo',
+      description: 'Kimi K2.5 Turbo · FirePass subscription model',
+      descriptionForModel:
+        'Kimi K2.5 Turbo - FirePass subscription with 256K context, no per-token charges',
     }
   }
   return {
@@ -156,6 +175,16 @@ function getOpus46Option(fastMode = false): ModelOption {
         'GPT-5.4 - most capable OpenAI model for complex coding work',
     }
   }
+  if (provider === 'firepass') {
+    const firepassModel = getModelStrings().opus46
+    return {
+      value: firepassModel,
+      label: 'Kimi K2.5 Turbo',
+      description: 'Kimi K2.5 Turbo · FirePass subscription model',
+      descriptionForModel:
+        'Kimi K2.5 Turbo - FirePass subscription with 256K context, no per-token charges',
+    }
+  }
   return {
     value: is3P ? getModelStrings().opus46 : 'opus',
     label: 'Opus',
@@ -174,6 +203,17 @@ export function getSonnet46_1MOption(): ModelOption {
       description: 'GPT-5.4 for long-running OpenAI sessions',
       descriptionForModel:
         'GPT-5.4 for long-running OpenAI sessions and large codebases',
+    }
+  }
+  if (provider === 'firepass') {
+    // FirePass Kimi has 256K context, no need for separate 1M option
+    const firepassModel = getModelStrings().sonnet46
+    return {
+      value: firepassModel,
+      label: 'Kimi K2.5 Turbo',
+      description: 'Kimi K2.5 Turbo · 256K context included',
+      descriptionForModel:
+        'Kimi K2.5 Turbo - 256K context window for long sessions',
     }
   }
   return {
@@ -195,6 +235,17 @@ export function getOpus46_1MOption(fastMode = false): ModelOption {
       description: 'GPT-5.4 for long-running OpenAI sessions',
       descriptionForModel:
         'GPT-5.4 for long-running OpenAI sessions and large codebases',
+    }
+  }
+  if (provider === 'firepass') {
+    // FirePass Kimi has 256K context, no need for separate 1M option
+    const firepassModel = getModelStrings().opus46
+    return {
+      value: firepassModel,
+      label: 'Kimi K2.5 Turbo',
+      description: 'Kimi K2.5 Turbo · 256K context included',
+      descriptionForModel:
+        'Kimi K2.5 Turbo - 256K context window for long sessions',
     }
   }
   return {
@@ -234,6 +285,16 @@ function getHaiku45Option(): ModelOption {
         'GPT-5.4 Mini - fastest OpenAI option for quick answers and lightweight tasks',
     }
   }
+  if (provider === 'firepass') {
+    const firepassModel = getModelStrings().haiku45
+    return {
+      value: firepassModel,
+      label: 'Kimi K2.5 Turbo',
+      description: 'Kimi K2.5 Turbo · FirePass subscription model',
+      descriptionForModel:
+        'Kimi K2.5 Turbo - FirePass subscription with 256K context, no per-token charges',
+    }
+  }
   return {
     value: 'haiku',
     label: 'Haiku',
@@ -253,6 +314,16 @@ function getHaiku35Option(): ModelOption {
       description: 'GPT-5.4 Mini for simple tasks',
       descriptionForModel:
         'GPT-5.4 Mini - lower latency OpenAI model for simple tasks',
+    }
+  }
+  if (provider === 'firepass') {
+    const firepassModel = getModelStrings().haiku35
+    return {
+      value: firepassModel,
+      label: 'Kimi K2.5 Turbo',
+      description: 'Kimi K2.5 Turbo · FirePass subscription model',
+      descriptionForModel:
+        'Kimi K2.5 Turbo - FirePass subscription with 256K context, no per-token charges',
     }
   }
   return {
@@ -403,6 +474,19 @@ function getModelOptionsBase(fastMode = false): ModelOption[] {
     }
     payg1POptions.push(getHaiku45Option())
     return payg1POptions
+  }
+
+  // FirePass: Simple list with just Kimi K2.5 Turbo
+  if (getAPIProvider() === 'firepass') {
+    const firepassModel = getModelStrings().sonnet46
+    return [
+      getDefaultOptionForUser(fastMode),
+      {
+        value: firepassModel,
+        label: 'Kimi K2.5 Turbo',
+        description: 'Kimi K2.5 Turbo · 256K context, subscription billing',
+      },
+    ]
   }
 
   // PAYG 3P: Default (Sonnet 4.5) + Sonnet (3P custom) or Sonnet 4.6/1M + Opus (3P custom) or Opus 4.1/Opus 4.6/Opus1M + Haiku + Opus 4.1
